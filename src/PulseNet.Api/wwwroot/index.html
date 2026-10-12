@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PulseNet — Социальная сеть</title>
+  <link rel="stylesheet" href="/css/pulsenet.css" />
+</head>
+<body>
+  <div class="card-container" id="stageContainer">
+    <!-- Динамический градиент-прожектор за курсором -->
+    <div class="bg-gradient" id="spotlightBg" aria-hidden="true"></div>
+
+    <!-- Интерактивное Canvas-созвездие -->
+    <canvas id="constellationCanvas" class="constellation-canvas" aria-hidden="true"></canvas>
+
+    <!-- Контейнер для расходящихся волн при наборе текста -->
+    <div class="particles-container" id="ripplesContainer" aria-hidden="true"></div>
+
+    <!-- Верхняя коммерческая шапка -->
+    <header class="top-bar">
+      <div class="brand-chip" id="brandHomeBtn" role="button" tabindex="0">
+        <span class="brand-spark">✦</span>
+        <span class="brand-title">PulseNet</span>
+      </div>
+
+      <div class="session-chip" id="sessionChip">
+        <span class="session-dot" id="sessionDot"></span>
+        <span id="sessionText">Гостевой режим</span>
+        <button type="button" class="session-logout hidden" id="logoutBtn">Выйти</button>
+      </div>
+    </header>
+
+    <!-- Органическое «дышащее» и морфящееся белое облако -->
+    <div class="cloud-wrapper" aria-hidden="true">
+      <svg
+        class="cloud-svg"
+        id="cloudSvg"
+        viewBox="0 0 1000 600"
+        preserveAspectRatio="xMidYMid slice"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          id="cloudMorphPath"
+          fill="#ffffff"
+          d="M 0 0 L 350 0 Q 420 -10 460 30 Q 520 20 570 60 Q 640 50 710 100 Q 800 90 870 150 Q 960 140 1000 220 L 1000 380 Q 980 440 920 450 Q 900 520 830 500 Q 810 560 730 530 Q 700 590 620 560 Q 580 610 500 570 Q 450 610 380 570 Q 330 610 260 550 Q 210 580 140 510 Q 70 540 0 460 Z"
+        />
+      </svg>
+    </div>
+
+    <!-- Основной двухколоночный слой контента внутри облака -->
+    <main class="content-container" id="contentContainer">
+      <!-- ЛЕВАЯ КОЛОНКА: Маскот + Формы / Профиль -->
+      <div class="cloud-left-stage">
+        <!-- ИНТЕРАКТИВНЫЙ МАСКОТ ПАНДА -->
+        <div class="panda-stage" id="pandaMascot">
+          <svg viewBox="0 0 100 100" width="100%" height="100%" class="panda-svg">
+            <defs>
+              <radialGradient id="face-grad" cx="50%" cy="40%" r="60%">
+                <stop offset="0%" stop-color="#ffffff" />
+                <stop offset="100%" stop-color="#f2effa" />
+              </radialGradient>
+            </defs>
+
+            <!-- Золотые искорки -->
+            <g class="panda-sparkle sparkle-left">
+              <path d="M 15 5 L 17 12 L 24 14 L 17 16 L 15 23 L 13 16 L 6 14 L 13 12 Z" fill="#f59e0b" />
+            </g>
+            <g class="panda-sparkle sparkle-right">
+              <path d="M 85 10 L 86.5 15 L 91.5 16.5 L 86.5 18 L 85 23 L 83.5 18 L 78.5 16.5 L 83.5 15 Z" fill="#f59e0b" />
+            </g>
+
+            <!-- Уши -->
+            <circle cx="20" cy="30" r="14" fill="#231f32" />
+            <circle cx="21" cy="31" r="6" fill="#14111f" />
+            <circle cx="80" cy="30" r="14" fill="#231f32" />
+            <circle cx="79" cy="31" r="6" fill="#14111f" />
+
+            <!-- Голова -->
+            <circle cx="50" cy="55" r="42" fill="url(#face-grad)" stroke="#e4dff2" stroke-width="2" />
+
+            <!-- Пятна вокруг глаз -->
+            <path d="M 25 40 Q 35 30 43 45 Q 40 55 25 50 Z" fill="#231f32" />
+            <path d="M 75 40 Q 65 30 57 45 Q 60 55 75 50 Z" fill="#231f32" />
+
+            <!-- Белки глаз -->
+            <circle cx="34" cy="44" r="8" fill="#ffffff" />
+            <circle cx="66" cy="44" r="8" fill="#ffffff" />
+
+            <!-- Левый зрачок + блик -->
+            <g id="pandaPupilLeft" class="panda-pupil">
+              <circle cx="34" cy="44" r="4.5" fill="#231f32" />
+              <circle cx="32" cy="42" r="1.5" fill="#ffffff" />
+            </g>
+
+            <!-- Правый зрачок + блик -->
+            <g id="pandaPupilRight" class="panda-pupil">
+              <circle cx="66" cy="44" r="4.5" fill="#231f32" />
+              <circle cx="64" cy="42" r="1.5" fill="#ffffff" />
+            </g>
+
+            <!-- Нос -->
+            <g class="panda-nose">
+              <ellipse cx="50" cy="62" rx="7" ry="4.5" fill="#231f32" />
+              <ellipse cx="48" cy="60.5" rx="2.5" ry="1.5" fill="#ffffff" opacity="0.75" />
+            </g>
+
+            <!-- Брови -->
+            <path id="pandaBrowLeft" class="panda-brow brow-left" d="M 27 34 Q 32 30 38 34" fill="transparent" stroke="#231f32" stroke-width="2.5" stroke-linecap="round" />
+            <path id="pandaBrowRight" class="panda-brow brow-right" d="M 62 34 Q 68 30 73 34" fill="transparent" stroke="#231f32" stroke-width="2.5" stroke-linecap="round" />
+
+            <!-- Рот и язычок -->
+            <g class="panda-mouth-group">
+              <path id="pandaMouthPath" d="M 45 70 Q 50 74 55 70" stroke="#231f32" stroke-width="2.5" fill="transparent" stroke-linecap="round" />
+              <ellipse class="panda-tongue" cx="50" cy="74" rx="5" ry="3.5" fill="#fb7185" />
+            </g>
+
+            <!-- Левая лапа -->
+            <g class="panda-paw paw-left">
+              <ellipse cx="22" cy="85" rx="14" ry="18" fill="#231f32" />
+              <ellipse cx="22" cy="82" rx="7" ry="5" fill="#3d3752" />
+              <ellipse cx="14" cy="74" rx="2.5" ry="3.5" fill="#3d3752" />
+              <ellipse cx="22" cy="71" rx="2.5" ry="3.5" fill="#3d3752" />
+              <ellipse cx="30" cy="74" rx="2.5" ry="3.5" fill="#3d3752" />
+            </g>
+
+            <!-- Правая лапа -->
+            <g class="panda-paw paw-right">
+              <ellipse cx="78" cy="85" rx="14" ry="18" fill="#231f32" />
+              <ellipse cx="78" cy="82" rx="7" ry="5" fill="#3d3752" />
+              <ellipse cx="70" cy="74" rx="2.5" ry="3.5" fill="#3d3752" />
+              <ellipse cx="78" cy="71" rx="2.5" ry="3.5" fill="#3d3752" />
+              <ellipse cx="86" cy="74" rx="2.5" ry="3.5" fill="#3d3752" />
+            </g>
+          </svg>
+        </div>
+
+        <!-- ЭКРАН 1: ВХОД -->
+        <section id="panelLogin" class="cloud-panel active" aria-label="Вход в аккаунт">
+          <h1 class="title">С возвращением!</h1>
+          <p class="subtitle">Войдите в свой аккаунт PulseNet</p>
+
+          <form id="loginForm" class="form" novalidate>
+            <div class="input-card">
+              <div class="icon-badge">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <input
+                type="text"
+                id="loginUserId"
+                class="input-field"
+                placeholder="ID вашего профиля"
+                autocomplete="username"
+                required
+              />
+            </div>
+
+            <div class="input-card">
+              <div class="icon-badge">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </div>
+              <input
+                type="password"
+                id="loginPassword"
+                class="input-field password-input"
+                placeholder="Пароль"
+                autocomplete="current-password"
+                required
+              />
+              <button type="button" class="toggle-eye" id="toggleLoginEye" aria-label="Показать или скрыть пароль">
+                <svg class="eye-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+
+            <div class="options-row">
+              <label class="checkbox-container">
+                <input type="checkbox" id="rememberMeCheck" checked />
+                <span class="custom-checkbox">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="white" stroke-width="3">
+                    <polyline class="check-poly" points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </span>
+                <span class="label-text">Запомнить меня</span>
+              </label>
+
+              <a href="#register" class="forgot-link" id="quickCreateFromOptions">Быстрая регистрация</a>
+            </div>
+
+            <div class="form-feedback hidden" id="loginFeedback" role="alert"></div>
+
+            <div class="button-wrapper">
+              <button type="submit" class="sign-in-button">ВОЙТИ</button>
+            </div>
+          </form>
+
+          <p class="footer-text">
+            Ещё нет аккаунта?
+            <a href="#register" class="create-link" id="goToRegisterLink">Создать анкету</a>
+          </p>
+        </section>
+
+        <!-- ЭКРАН 2: РЕГИСТРАЦИЯ -->
+        <section id="panelRegister" class="cloud-panel" aria-label="Регистрация анкеты">
+          <h1 class="title compact-title">Новая анкета</h1>
+          <p class="subtitle compact-sub">Расскажите о себе участникам сообщества</p>
+
+          <form id="registerForm" class="form compact-form" novalidate>
+            <div class="row-2">
+              <div class="input-card compact-card">
+                <div class="icon-badge small-badge">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                </div>
+                <input type="text" id="regFirstName" class="input-field" placeholder="Имя" maxlength="100" required />
+              </div>
+
+              <div class="input-card compact-card">
+                <div class="icon-badge small-badge">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                  </svg>
+                </div>
+                <input type="text" id="regSecondName" class="input-field" placeholder="Фамилия" maxlength="100" required />
+              </div>
+            </div>
+
+            <div class="row-2">
+              <div class="input-card compact-card">
+                <div class="icon-badge small-badge">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                </div>
+                <input type="date" id="regBirthdate" class="input-field" required />
+              </div>
+
+              <div class="input-card compact-card">
+                <div class="icon-badge small-badge">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                </div>
+                <input type="text" id="regCity" class="input-field" placeholder="Город" maxlength="100" required />
+              </div>
+            </div>
+
+            <div class="segmented-gender" id="genderSegmented" role="radiogroup" aria-label="Пол">
+              <div class="gender-pill-indicator" id="genderIndicator"></div>
+              <button type="button" class="gender-btn active" data-gender="male" role="radio" aria-checked="true">Мужской</button>
+              <button type="button" class="gender-btn" data-gender="female" role="radio" aria-checked="false">Женский</button>
+              <button type="button" class="gender-btn" data-gender="unspecified" role="radio" aria-checked="false">Не указан</button>
+            </div>
+
+            <div class="input-card compact-card">
+              <div class="icon-badge small-badge">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+              </div>
+              <input type="text" id="regBiography" class="input-field" placeholder="Интересы и увлечения" maxlength="2000" required />
+            </div>
+
+            <div class="input-card compact-card">
+              <div class="icon-badge small-badge">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </div>
+              <input
+                type="password"
+                id="regPassword"
+                class="input-field password-input"
+                placeholder="Придумайте пароль"
+                autocomplete="new-password"
+                required
+              />
+              <button type="button" class="toggle-eye" id="toggleRegEye" aria-label="Показать или скрыть пароль">
+                <svg class="eye-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+
+            <div class="form-feedback hidden" id="registerFeedback" role="alert"></div>
+
+            <div class="button-wrapper compact-btn-wrap">
+              <button type="submit" class="sign-in-button">ЗАРЕГИСТРИРОВАТЬСЯ</button>
+            </div>
+          </form>
+
+          <p class="footer-text">
+            Уже зарегистрированы?
+            <a href="#login" class="create-link" id="goToLoginLink">Войти</a>
+          </p>
+        </section>
+
+        <!-- ЭКРАН 3: СТРАНИЦА АНКЕТЫ -->
+        <section id="panelProfile" class="cloud-panel" aria-label="Анкета участника">
+          <div id="profileEmptyState" class="profile-empty hidden">
+            <h2 class="title compact-title" id="emptyStateTitle">Профиль не выбран</h2>
+            <p class="subtitle" id="emptyStateReason">
+              Воспользуйтесь поиском по ID в нижней панели или создайте собственную анкету.
+            </p>
+            <div class="empty-btn-group">
+              <button type="button" class="sign-in-button auto-width" id="emptyGoCreateBtn">Создать анкету</button>
+            </div>
+          </div>
+
+          <article id="profileCard" class="profile-card-cloud hidden">
+            <div class="profile-cloud-top">
+              <div class="profile-avatar-circle" id="profileAvatar">PN</div>
+              <div class="profile-title-col">
+                <div class="profile-chips-row">
+                  <span class="p-chip primary" id="profileCityBadge">Город</span>
+                  <span class="p-chip" id="profileGenderBadge">Пол</span>
+                  <span class="p-chip" id="profileAgeBadge">Возраст</span>
+                </div>
+                <h1 class="profile-name-heading" id="profileFullName">Имя Фамилия</h1>
+              </div>
+            </div>
+
+            <div class="profile-uuid-box">
+              <span class="uuid-caption">ID:</span>
+              <code class="uuid-code" id="profileIdValue">—</code>
+              <button type="button" class="copy-uuid-btn" id="copyIdBtn">
+                <span id="copyIdLabel">Скопировать</span>
+                <svg class="copy-tick-svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3">
+                  <path class="copy-tick-path" d="M4 12.5L9.5 18L20 6"></path>
+                </svg>
+              </button>
+            </div>
+
+            <div class="profile-details-grid">
+              <div class="detail-cell">
+                <span class="detail-label">Имя</span>
+                <span class="detail-val" id="profileFirstName">—</span>
+              </div>
+              <div class="detail-cell">
+                <span class="detail-label">Фамилия</span>
+                <span class="detail-val" id="profileSecondName">—</span>
+              </div>
+              <div class="detail-cell">
+                <span class="detail-label">Дата рождения</span>
+                <span class="detail-val" id="profileBirthdate">—</span>
+              </div>
+              <div class="detail-cell">
+                <span class="detail-label">Пол</span>
+                <span class="detail-val" id="profileGenderText">—</span>
+              </div>
+            </div>
+
+            <div class="profile-interests-card">
+              <span class="detail-label">Интересы и о себе</span>
+              <p class="interests-text" id="profileBiography">—</p>
+            </div>
+
+            <div class="profile-bottom-bar">
+              <button type="button" class="secondary-pill-btn" id="useIdForLoginBtn">Войти в этот профиль</button>
+            </div>
+          </article>
+        </section>
+      </div>
+
+      <!-- ПРАВАЯ КОЛОНКА (внутри белого облака, читаемый тёмно-индиговый текст с золотым ховером букв) -->
+      <aside class="welcome-section" aria-hidden="true">
+        <h2 class="welcome-title" id="typewriterTitle"></h2>
+        <p class="welcome-desc" id="typewriterDesc"></p>
+      </aside>
+    </main>
+
+    <!-- ПЛАВАЮЩИЙ СТЕКЛЯННЫЙ ДОК С ПОИСКОМ НАД КНОПКОЙ ПОИСКА -->
+    <div class="apple-dock-wrapper">
+      <nav class="apple-dock" id="appleDock" aria-label="Навигация">
+        <div class="dock-active-pill" id="dockActivePill">
+          <span class="dock-active-dot" id="dockActiveDot"></span>
+        </div>
+
+        <!-- Вкладка 1: Вход -->
+        <button type="button" class="dock-btn active" data-dock="login">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span class="dock-label">Вход</span>
+        </button>
+
+        <!-- Вкладка 2: Регистрация -->
+        <button type="button" class="dock-btn" data-dock="register">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <line x1="20" y1="8" x2="20" y2="14"></line>
+            <line x1="23" y1="11" x2="17" y2="11"></line>
+          </svg>
+          <span class="dock-label">Регистрация</span>
+        </button>
+
+        <!-- Вкладка 3: Поиск (всплывающая капсула открывается СТРОГО НАД кнопкой поиска) -->
+        <div class="dock-search-anchor" id="dockSearchAnchor">
+          <form class="dock-search-popover" id="dockSearchForm" novalidate>
+            <svg class="popover-search-icon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.3">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+              type="text"
+              id="dockSearchInput"
+              class="dock-search-input"
+              placeholder="Найти профиль по ID..."
+              aria-label="Найти профиль по ID"
+            />
+            <button type="submit" class="dock-search-submit">Открыть</button>
+            <button type="button" class="dock-search-close" id="dockSearchClose" aria-label="Закрыть">×</button>
+          </form>
+
+          <button type="button" class="dock-btn" id="dockSearchTrigger" data-dock="search">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span class="dock-label">Поиск</span>
+          </button>
+        </div>
+
+        <!-- Вкладка 4: Анкета -->
+        <button type="button" class="dock-btn" data-dock="profile">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="16" rx="3"></rect>
+            <circle cx="9" cy="10" r="2"></circle>
+            <path d="M15 8h2"></path>
+            <path d="M15 12h2"></path>
+            <path d="M7 16h10"></path>
+          </svg>
+          <span class="dock-label">Анкеты</span>
+        </button>
+
+        <!-- Вкладка 5: Моя анкета -->
+        <button type="button" class="dock-btn" data-dock="me">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span class="dock-label">Профиль</span>
+          <span class="dock-badge hidden" id="authActiveBadge">●</span>
+        </button>
+
+        <!-- Кнопка 6: Симпатия / Сердце -->
+        <button type="button" class="dock-btn heart-btn" id="dockHeartBtn" aria-label="Отправить реакцию">
+          <div class="heart-particles-anchor" id="heartParticlesAnchor" aria-hidden="true"></div>
+          <svg viewBox="0 0 24 24" width="23" height="23" class="dock-heart-svg">
+            <defs>
+              <linearGradient id="main-heart-insta-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#f59e0b" />
+                <stop offset="35%" stop-color="#ec4899" />
+                <stop offset="70%" stop-color="#db2777" />
+                <stop offset="100%" stop-color="#7c3aed" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z"
+              fill="url(#main-heart-insta-grad)"
+            />
+          </svg>
+          <span class="dock-label">Отклик</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <script src="/js/pulsenet.js" defer></script>
+</body>
+</html>

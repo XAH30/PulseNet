@@ -1,0 +1,34 @@
+# .NET build artifacts
+bin/
+obj/
+out/
+publish/
+
+# IDE and OS
+.vs/
+.idea/
+.DS_Store
+
+# Secrets and local env
+.env
+*.env
+!.env.example
+secrets/
+*.pem
+*.key
+
+# Build and test logs
+logs/
+TestResults/
+
+# Internal workflow & agent documentation
+checkpoints/
+reports/
+registry.jsonl
+gates-decisions.jsonl
+requests.json
+AGENTS.md
+CLAUDE.md
+.claude/
+.gemini/
+

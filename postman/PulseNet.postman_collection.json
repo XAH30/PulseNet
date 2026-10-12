@@ -1,0 +1,282 @@
+{
+  "info": {
+    "_postman_id": "77700001-0000-4000-8000-000000000001",
+    "name": "PulseNet — OTUS Highload Architect HW1",
+    "description": "Коллекция запросов для проверки ДЗ №1 «Заготовка для социальной сети» (PulseNet на .NET 10 + PostgreSQL без ORM).\nВсе тестовые данные синтетические (FAKEPII_).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "77700001-0000-4000-8000-000000000001",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userPassword",
+      "value": "FAKEPII_Pass_900000001!",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Регистрация анкеты (POST /user/register)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Статус 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Возвращён валидный UUID user_id', function () {",
+              "    pm.expect(json.user_id).to.be.a('string');",
+              "    pm.expect(json.user_id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);",
+              "});",
+              "if (json.user_id) {",
+              "    pm.collectionVariables.set('userId', json.user_id);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"first_name\": \"FAKE_Ivan\",\n  \"second_name\": \"Zz_Petrov\",\n  \"birthdate\": \"1996-05-14\",\n  \"gender\": \"male\",\n  \"biography\": \"FAKEPII_Highload architecture, PostgreSQL without ORM, .NET 10\",\n  \"city\": \"FAKEPII_City_777000001\",\n  \"password\": \"{{userPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/user/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "register"
+          ]
+        }
+      }
+    },
+    {
+      "name": "2. Авторизация пользователя (POST /login)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Статус 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Возвращён токен авторизации', function () {",
+              "    pm.expect(json.token).to.be.a('string').and.not.empty;",
+              "});",
+              "if (json.token) {",
+              "    pm.collectionVariables.set('authToken', json.token);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"{{userId}}\",\n  \"password\": \"{{userPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. Получение анкеты по ID (GET /user/get/{id})",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Статус 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Анкета содержит все поля по ТЗ и OpenAPI', function () {",
+              "    pm.expect(json.id).to.eql(pm.collectionVariables.get('userId'));",
+              "    pm.expect(json.first_name).to.eql('FAKE_Ivan');",
+              "    pm.expect(json.second_name).to.eql('Zz_Petrov');",
+              "    pm.expect(json.birthdate).to.eql('1996-05-14');",
+              "    pm.expect(json.gender).to.eql('male');",
+              "    pm.expect(json.city).to.eql('FAKEPII_City_777000001');",
+              "    pm.expect(json.biography).to.include('FAKEPII_Highload');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/user/get/{{userId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "get",
+            "{{userId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. Получение собственного профиля по Bearer-токену (GET /user/me)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Статус 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Возвращена анкета текущего пользователя', function () {",
+              "    pm.expect(json.id).to.eql(pm.collectionVariables.get('userId'));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/user/me",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "me"
+          ]
+        }
+      }
+    },
+    {
+      "name": "5. Проверка защиты от SQL-инъекции (GET /user/get/{sqli})",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('SQL-инъекция в параметре пути отклонена со статусом 400 Bad Request', function () {",
+              "    pm.response.to.have.status(400);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/user/get/'%20OR%20'1'='1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "get",
+            "'%20OR%20'1'='1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "6. Негативный тест: вход несуществующего пользователя (404 Not Found)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Статус 404 Not Found', function () {",
+              "    pm.response.to.have.status(404);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"77700001-0000-4000-8000-999999999999\",\n  \"password\": \"{{userPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      }
+    }
+  ]
+}

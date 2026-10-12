@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: pulsenet-postgres
+    environment:
+      POSTGRES_DB: pulsenet
+      POSTGRES_USER: pulsenet_user
+      POSTGRES_PASSWORD: FAKEPII_LocalDevPass_900000001
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - pulsenet_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pulsenet_user -d pulsenet"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  pulsenet-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pulsenet-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      PULSENET_DB_CONNECTION: "Host=postgres;Port=5432;Database=pulsenet;Username=pulsenet_user;Password=FAKEPII_LocalDevPass_900000001"
+      PULSENET_TOKEN_SECRET: "FAKEPII_HmacKey_777000001_PulseNet_Synthetic_Secret_Key_32B"
+    ports:
+      - "8080:8080"
+
+volumes:
+  pulsenet_pgdata:
